@@ -1,5 +1,7 @@
 import chess
 import random
+import serial
+import random
 '''
 Author: Leo Carten.
 Topic: Minimax function inplementation based on chess library.
@@ -134,6 +136,27 @@ def main():
             best_move = find_best_move(board, depth=3) # go get the most optimal move!
             print(f"The AI optimal choice movement: {best_move}")
             board.push(best_move)
+            #!/usr/bin/env python3
+
+            ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            ser.reset_input_buffer()
+
+            if True:
+                number = ser.read()
+                if number != b'':
+                    if int.from_bytes(number, byteorder='big') == 18:
+                        led_number = 0
+                        if best_move[0] == 'a':
+                            led_number = 1
+                        if best_move[0] == 'b':
+                            led_number = 2
+                        if best_move[0] == 'c':
+                            led_number = 3
+                        else:
+                            led_number = 4
+                        print("Button has been pressed.")
+                        print("Sending number " + str(led_number) + " to Arduino.")
+                        ser.write(str(led_number).encode('utf-8'))
         else:
             # best_move = find_best_move(board, depth=2) # go get the most optimal move!
             # print(f"The AI optimal choice movement: {best_move}")
