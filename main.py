@@ -1,7 +1,7 @@
 import chess
 import random
-import serial
-import random
+# import serial
+# import random
 '''
 Author: Leo Carten.
 Topic: Minimax function inplementation based on chess library.
@@ -114,6 +114,32 @@ def find_best_move(board, depth):
             best_move = move
     return best_move
 
+def map_square_to_place(square):
+    y_coor = square // 7
+    all_way_to_right = y_coor * 8 - 1
+    map = {
+        all_way_to_right: "h",
+        all_way_to_right - 1: "g",
+        all_way_to_right - 2: "f",
+        all_way_to_right - 3: "e",
+        all_way_to_right - 4: "d",
+        all_way_to_right - 5: "c",
+        all_way_to_right - 6: "b",
+        all_way_to_right - 7: "a",
+    }
+    count = all_way_to_right
+    while count > square:  
+        count -= 1
+    print(f"{square} to chess is: {map[count]}{y_coor}")
+    # example -> 55 would be h7
+    # square // 7 == x coor
+    string = ""
+    string += map[count]
+    string+= str(y_coor)
+    string += "d10"
+    return str(string)
+
+
 
 def getBoardFEN_string(board):
     return board.fen().split()[0]
@@ -133,43 +159,40 @@ def main():
         print(f"Evaluation other: {getBoardFEN_string(board)}")
         print(board)
         if counter % 2 == 0: # this determines if it is our turn or the AIs turn
-            best_move = find_best_move(board, depth=3) # go get the most optimal move!
+            best_move = find_best_move(board, depth=1) # go get the most optimal move!
             print(f"The AI optimal choice movement: {best_move}")
+            if board.is_capture(best_move):
+                # a piece has been taken !!
+                captured_square = best_move.to_square
+                captured_piece = board.piece_at(captured_square)
+                print(f"AI captured {captured_piece} at {captured_square}")
+                discard_cor = map_square_to_place(captured_square)
+                # send the arduino discard_cor
+                print(discard_cor)
             board.push(best_move)
-            #!/usr/bin/env python3
 
-            ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-            ser.reset_input_buffer()
-
-            if True:
-                number = ser.read()
-                if number != b'':
-                    if int.from_bytes(number, byteorder='big') == 18:
-                        led_number = 0
-                        if best_move[0] == 'a':
-                            led_number = 1
-                        if best_move[0] == 'b':
-                            led_number = 2
-                        if best_move[0] == 'c':
-                            led_number = 3
-                        else:
-                            led_number = 4
-                        print("Button has been pressed.")
-                        print("Sending number " + str(led_number) + " to Arduino.")
-                        ser.write(str(led_number).encode('utf-8'))
         else:
-            # best_move = find_best_move(board, depth=2) # go get the most optimal move!
-            # print(f"The AI optimal choice movement: {best_move}")
-            # board.push(best_move)
             if board.is_check():
                 print("YOU'RE IN CHECK")
             print(f"Legal moves for this turn: {getListOfMoves(board)}")
-            # random_index = random.randint(0, len(getListOfMoves(board)) - 1)
-            # selected_element = getListOfMoves(board)[random_index]
+
             user_input = input("Enter move: ")
             while user_input not in getListOfMoves(board):
                 user_input = input("Please chooose a new move: ")
+            move = board.parse_san(user_input)
+            if board.is_capture(move):
+                # Convert user input (SAN) to a move object
+                # Now you can use the move object
+                captured_square = move.to_square
+                captured_piece = board.piece_at(captured_square)
+                
+                print(f"Human captured {captured_piece} at {captured_square}")
+                discard_cor = map_square_to_place(captured_square)
+                print(discard_cor)
+                # send the arduino the discard_cor and wait for a response
+
             board.push_san(user_input)
+
         counter += 1
 
     print(f"Total game moves: {counter}")
