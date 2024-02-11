@@ -18,13 +18,11 @@ A function that will return the optimized move for the AI.
 def minimax(board, depth, maximizing_player):
     # i think i need to have a different condition for when the depth is 0 and the game is over...
 
-
     if depth == 0 or board.is_checkmate() or board.is_stalemate(): # if the game is over OR all possible options have been explored... just end the function call.
         # print(evaluateGame(getBoardFEN_string(board)))
         
         return evaluateGame(getBoardFEN_string(board)) # we have reached the limit of how far we can explore into the future, so, we return the current score if we were to make that move.
     
-
 
     if maximizing_player is True: # if it is our turn, we want to maximax the AI score by continously finding the best possible score. we return the max score
         max_eval = float('-inf') # start at a large negative number, and find the best move to optimize score
@@ -98,21 +96,28 @@ def getScore(board):
 def find_best_move(board, depth):
     best_move = "" 
     max_eval = float('-inf')
+    arrayOfEqualMoves = []
 
     for move in board.legal_moves: 
-        # print(f"move: {move}")
         # explore each move by putting it on the board, then explore the score using the minimax function, and then pop the move so it is not permanent.
         board.push(move) # make the move and explore it
         eval = minimax(board, depth - 1, False) # call this function and continously update the the eval variable
         board.pop() # remove the move you just did
-
-        # if eval == None:
-        #     break
+        print(move)
 
         if eval > max_eval:
             max_eval = eval
             best_move = move
-    return best_move
+            arrayOfEqualMoves = []
+        elif eval == max_eval:
+            arrayOfEqualMoves.append(move)
+    
+    # If we do not see any moves that will immediately benefit us, select a random move
+    if len(arrayOfEqualMoves) == 0:
+        return best_move
+    else:
+        random_move = random.randint(0, (len(arrayOfEqualMoves) -1))
+        return arrayOfEqualMoves[random_move]
 
 def map_square_to_place(square):
     y_coor = square // 7
@@ -159,7 +164,7 @@ def main():
         print(f"Evaluation other: {getBoardFEN_string(board)}")
         print(board)
         if counter % 2 == 0: # this determines if it is our turn or the AIs turn
-            best_move = find_best_move(board, depth=1) # go get the most optimal move!
+            best_move = find_best_move(board, depth=3) # go get the most optimal move!
             print(f"The AI optimal choice movement: {best_move}")
             if board.is_capture(best_move):
                 # a piece has been taken !!
@@ -176,9 +181,11 @@ def main():
                 print("YOU'RE IN CHECK")
             print(f"Legal moves for this turn: {getListOfMoves(board)}")
 
-            user_input = input("Enter move: ")
-            while user_input not in getListOfMoves(board):
-                user_input = input("Please chooose a new move: ")
+            # user_input = input("Enter move: ")
+            # while user_input not in getListOfMoves(board):
+            #     user_input = input("Please chooose a new move: ")
+            random_move = random.randint(0, len(getListOfMoves(board))-1)
+            user_input = getListOfMoves(board)[random_move]
             move = board.parse_san(user_input)
             if board.is_capture(move):
                 # Convert user input (SAN) to a move object
