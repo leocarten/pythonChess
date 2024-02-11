@@ -1,6 +1,6 @@
 import chess
 import random
-# import serial
+import serial
 import random
 import time
 from apriceChessboard import uiChessboard
@@ -199,50 +199,49 @@ def main():
             
 
             # UNCOMMENT
-            # print(f"The AI optimal choice movement: {best_move}")
-            # ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-            # ser.reset_input_buffer()
+            print(f"The AI optimal choice movement: {best_move}")
+            ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            ser.reset_input_buffer()
             print("Ser")
             square = best_move.to_square
             print(f"The piece location was: {square}")
 
 
             # UNCOMMENT
-            # if board.is_capture(best_move):
-            #     #time.sleep(3)
-            #     # a piece has been taken !! WE NEED TO CAPTURE!!
-            #     captured_square = best_move.to_square
-            #     print(f"The captured piece location was: {captured_square}")
-            #     #captured_piece = board.piece_at(captured_square)
-            #     discard_cor = map_square_to_place(captured_square)
-            #     ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-            #     ser.reset_input_buffer()
-            #     stop_string = "Stop"
-            #     line = ""
+            if board.is_capture(best_move):
+                #time.sleep(3)
+                # a piece has been taken !! WE NEED TO CAPTURE!!
+                captured_square = best_move.to_square
+                print(f"The captured piece location was: {captured_square}")
+                #captured_piece = board.piece_at(captured_square)
+                discard_cor = map_square_to_place(captured_square)
+                ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+                ser.reset_input_buffer()
+                stop_string = "Stop"
+                line = ""
 
-            #     while line != stop_string:
-            #         newS = ""
-            #         newS += str(discard_cor)
-            #         newS += "\n"
-            #         ser.write(str(newS).encode('utf-8'))
-            #         line = ser.readline().decode('utf-8').rstrip()
+                while line != stop_string:
+                    newS = ""
+                    newS += str(discard_cor)
+                    newS += "\n"
+                    ser.write(str(newS).encode('utf-8'))
+                    line = ser.readline().decode('utf-8').rstrip()
             
-            # ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-            # ser.reset_input_buffer()
-            # stop_string = "Stop"
-            # line = ""
+            ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            ser.reset_input_buffer()
+            stop_string = "Stop"
+            line = ""
             
 
-            # while line != stop_string:
-            #     newS = ""
-            #     newS += str(best_move)
-            #     newS += "\n"
-            #     ser.write(str(newS).encode('utf-8'))
-            #     line = ser.readline().decode('utf-8').rstrip()
-                #print(line)
+            while line != stop_string:
+                newS = ""
+                newS += str(best_move)
+                newS += "\n"
+                ser.write(str(newS).encode('utf-8'))
+                line = ser.readline().decode('utf-8').rstrip()
+                print(line)
 
-
-                   
+ 
                 
             # finally, do the move
             print("We got to this point!")
@@ -288,24 +287,24 @@ def main():
 
             
             # UNCOMMENT
-            # if board.is_capture(move):
-            #     # a piece has been taken !! WE NEED TO CAPTURE!!
-            #     #time.sleep(3)
-            #     captured_square = move.to_square # read about this !!
-            #     # captured_piece = board.piece_at(captured_square)
-            #     discard_cor = map_square_to_place(captured_square)
-            #     print(f"The captured piece location was: {captured_square}")
-            #     ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-            #     ser.reset_input_buffer()
-            #     stop_string = "Stop"
-            #     line = ""
+            if board.is_capture(move):
+                # a piece has been taken !! WE NEED TO CAPTURE!!
+                #time.sleep(3)
+                captured_square = move.to_square # read about this !!
+                # captured_piece = board.piece_at(captured_square)
+                discard_cor = map_square_to_place(captured_square)
+                print(f"The captured piece location was: {captured_square}")
+                ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+                ser.reset_input_buffer()
+                stop_string = "Stop"
+                line = ""
 
-            #     while line != stop_string:
-            #         newS = ""
-            #         newS += str(discard_cor)
-            #         newS += "\n"
-            #         ser.write(str(newS).encode('utf-8'))
-            #         line = ser.readline().decode('utf-8').rstrip()
+                while line != stop_string:
+                    newS = ""
+                    newS += str(discard_cor)
+                    newS += "\n"
+                    ser.write(str(newS).encode('utf-8'))
+                    line = ser.readline().decode('utf-8').rstrip()
                 
             
             
@@ -325,16 +324,16 @@ def main():
             '''
             
             # UNCOMMENT
-            # ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-            # ser.reset_input_buffer()
-            # stop_string = "Stop"
-            # line = ""
-            # while line != stop_string:
-            #     newS = ""
-            #     newS += str(user_input)
-            #     newS += "\n"
-            #     ser.write(str(newS).encode('utf-8'))
-            #     line = ser.readline().decode('utf-8').rstrip()
+            ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            ser.reset_input_buffer()
+            stop_string = "Stop"
+            line = ""
+            while line != stop_string:
+                newS = ""
+                newS += str(user_input)
+                newS += "\n"
+                ser.write(str(newS).encode('utf-8'))
+                line = ser.readline().decode('utf-8').rstrip()
             board.push_san(user_input)
             
             print(f"You chose: {user_input}")
