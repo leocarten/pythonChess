@@ -1,11 +1,18 @@
 import chess
 import random
 # import serial
-# import random
+import random
+import time
+from apriceChessboard import uiChessboard
+from tkinter import *
+from tkinter.ttk import *
+
 '''
 Author: Leo Carten.
 Topic: Minimax function inplementation based on chess library.
-Summary: Minimax functions are typically used in 1v1 player games, and are desicion making trees that aim to maximize the score of one player, and minimize the score of another player. My implementation of the minimax function uses recursion to recusively iterate through possible moves, and then evaluation the score of the game if that move were to be made. We then remove the move we want to explore, keeping track of the maximum score of each iteration, and return the greatest score to maximize our chances of winning.
+Summary: Minimax functions are typically used in 1v1 player games, and are desicion making trees that aim to maximize the score of one player, and minimize the score of another player. My implementation of t
+he minimax function uses recursion to recusively iterate through possible moves, and then evaluation the score of the game if that move were to be made. We then remove the move we want to explore, keeping tr
+ack of the maximum score of each iteration, and return the greatest score to maximize our chances of winning.
 '''
 
 def createBoard():
@@ -18,11 +25,13 @@ A function that will return the optimized move for the AI.
 def minimax(board, depth, maximizing_player):
     # i think i need to have a different condition for when the depth is 0 and the game is over...
 
+
     if depth == 0 or board.is_checkmate() or board.is_stalemate(): # if the game is over OR all possible options have been explored... just end the function call.
         # print(evaluateGame(getBoardFEN_string(board)))
         
         return evaluateGame(getBoardFEN_string(board)) # we have reached the limit of how far we can explore into the future, so, we return the current score if we were to make that move.
     
+
 
     if maximizing_player is True: # if it is our turn, we want to maximax the AI score by continously finding the best possible score. we return the max score
         max_eval = float('-inf') # start at a large negative number, and find the best move to optimize score
@@ -90,64 +99,65 @@ def getScore(board):
             elif pieces.isupper():
                 white_score += value
 
-    print(f"black score: {black_score}")
-    print(f"white score: {white_score}")
+    print(f"Human [black] score: {black_score}")
+    print(f"AI [white] score: {white_score}")
 
 def find_best_move(board, depth):
     best_move = "" 
     max_eval = float('-inf')
-    arrayOfEqualMoves = []
+    arrayOfOptions = []
 
     for move in board.legal_moves: 
+        # print(f"move: {move}")
         # explore each move by putting it on the board, then explore the score using the minimax function, and then pop the move so it is not permanent.
         board.push(move) # make the move and explore it
         eval = minimax(board, depth - 1, False) # call this function and continously update the the eval variable
         board.pop() # remove the move you just did
-        print(move)
+
+        # if eval == None:
+        #     break
 
         if eval > max_eval:
             max_eval = eval
             best_move = move
-            arrayOfEqualMoves = []
+            arrayOfOptions = []
         elif eval == max_eval:
-            arrayOfEqualMoves.append(move)
-    
-    # If we do not see any moves that will immediately benefit us, select a random move
-    if len(arrayOfEqualMoves) == 0:
+            arrayOfOptions.append(move)
+        
+    if len(arrayOfOptions) == 0:
         return best_move
     else:
-        random_move = random.randint(0, (len(arrayOfEqualMoves) -1))
-        return arrayOfEqualMoves[random_move]
-
-def map_square_to_place(square):
-    y_coor = square // 7
-    all_way_to_right = y_coor * 8 - 1
-    map = {
-        all_way_to_right: "h",
-        all_way_to_right - 1: "g",
-        all_way_to_right - 2: "f",
-        all_way_to_right - 3: "e",
-        all_way_to_right - 4: "d",
-        all_way_to_right - 5: "c",
-        all_way_to_right - 6: "b",
-        all_way_to_right - 7: "a",
-    }
-    count = all_way_to_right
-    while count > square:  
-        count -= 1
-    print(f"{square} to chess is: {map[count]}{y_coor}")
-    # example -> 55 would be h7
-    # square // 7 == x coor
-    string = ""
-    string += map[count]
-    string+= str(y_coor)
-    string += "d10"
-    return str(string)
-
+        choice = random.randint(0,len(arrayOfOptions)-1)
+        return arrayOfOptions[choice]
+    return best_move
 
 
 def getBoardFEN_string(board):
     return board.fen().split()[0]
+
+def map_square_to_place(square):
+    first_move = ""
+    total_move = ""
+    dump_spot = "d9"
+    chessboard_coordinates = {
+        0: 'a1',  1: 'b1',  2: 'c1',  3: 'd1',  4: 'e1',  5: 'f1',  6: 'g1',  7: 'h1',
+        8: 'a2',  9: 'b2', 10: 'c2', 11: 'd2', 12: 'e2', 13: 'f2', 14: 'g2', 15: 'h2',
+       16: 'a3', 17: 'b3', 18: 'c3', 19: 'd3', 20: 'e3', 21: 'f3', 22: 'g3', 23: 'h3',
+       24: 'a4', 25: 'b4', 26: 'c4', 27: 'd4', 28: 'e4', 29: 'f4', 30: 'g4', 31: 'h4',
+       32: 'a5', 33: 'b5', 34: 'c5', 35: 'd5', 36: 'e5', 37: 'f5', 38: 'g5', 39: 'h5',
+       40: 'a6', 41: 'b6', 42: 'c6', 43: 'd6', 44: 'e6', 45: 'f6', 46: 'g6', 47: 'h6',
+       48: 'a7', 49: 'b7', 50: 'c7', 51: 'd7', 52: 'e7', 53: 'f7', 54: 'g7', 55: 'h7',
+       56: 'a8', 57: 'b8', 58: 'c8', 59: 'd8', 60: 'e8', 61: 'f8', 62: 'g8', 63: 'h8',
+    }
+    first_move = chessboard_coordinates[square]
+    total_move += first_move
+    total_move += dump_spot
+    print("---------------------------------------")
+    print("I JUST DICARDED")
+    print("---------------------------------------")
+    return total_move
+    #return str(string)
+        
 
 def getListOfMoves(board):
     return [move.uci() for move in board.legal_moves]
@@ -155,51 +165,181 @@ def getListOfMoves(board):
 def main():
     board = createBoard()
     counter = 0
+    total_count = 1
     # we run a game loop, making sure that someone is not in checkmate / stalemate
     while not board.is_checkmate() and not board.is_stalemate():
         print("-------------------------")
         FEN = getBoardFEN_string(board)
         getScore(FEN) # print the score based on the FEN string
+        evaluation = evaluateGame(FEN)
         print(f"Evaluation: {evaluateGame(FEN)}")
         print(f"Evaluation other: {getBoardFEN_string(board)}")
         print(board)
+        
+        print(f"Move count: {total_count}")
+        
+        '''
+        below is AI move
+        '''
         if counter % 2 == 0: # this determines if it is our turn or the AIs turn
-            best_move = find_best_move(board, depth=3) # go get the most optimal move!
-            print(f"The AI optimal choice movement: {best_move}")
-            if board.is_capture(best_move):
-                # a piece has been taken !!
-                captured_square = best_move.to_square
-                captured_piece = board.piece_at(captured_square)
-                print(f"AI captured {captured_piece} at {captured_square}")
-                discard_cor = map_square_to_place(captured_square)
-                # send the arduino discard_cor
-                print(discard_cor)
+            print(f"Count move: {total_count}")
+            best_move = find_best_move(board, depth=3)
+            
+            '''
+            if evaluation >= 0 and evaluation <= 15:
+                best_move = find_best_move(board, depth=2) 
+                print("Depth: 2")
+            elif evaluation >= 16 and evaluation <= 35:
+                best_move = find_best_move(board, depth=3) 
+                print("Depth: 3")
+            else:
+                best_move = find_best_move(board, depth=1) 
+                print("Depth: 1")
+            '''
+            
+
+            # UNCOMMENT
+            # print(f"The AI optimal choice movement: {best_move}")
+            # ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            # ser.reset_input_buffer()
+            print("Ser")
+            square = best_move.to_square
+            print(f"The piece location was: {square}")
+
+
+            # UNCOMMENT
+            # if board.is_capture(best_move):
+            #     #time.sleep(3)
+            #     # a piece has been taken !! WE NEED TO CAPTURE!!
+            #     captured_square = best_move.to_square
+            #     print(f"The captured piece location was: {captured_square}")
+            #     #captured_piece = board.piece_at(captured_square)
+            #     discard_cor = map_square_to_place(captured_square)
+            #     ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            #     ser.reset_input_buffer()
+            #     stop_string = "Stop"
+            #     line = ""
+
+            #     while line != stop_string:
+            #         newS = ""
+            #         newS += str(discard_cor)
+            #         newS += "\n"
+            #         ser.write(str(newS).encode('utf-8'))
+            #         line = ser.readline().decode('utf-8').rstrip()
+            
+            # ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            # ser.reset_input_buffer()
+            # stop_string = "Stop"
+            # line = ""
+            
+
+            # while line != stop_string:
+            #     newS = ""
+            #     newS += str(best_move)
+            #     newS += "\n"
+            #     ser.write(str(newS).encode('utf-8'))
+            #     line = ser.readline().decode('utf-8').rstrip()
+                #print(line)
+
+
+                   
+                
+            # finally, do the move
+            print("We got to this point!")
             board.push(best_move)
 
+            #!/usr/bin/env python3
+
+            total_count += 1
         else:
+            # time.sleep(3)
+            # best_move = find_best_move(board, depth=2) # go get the most optimal move!
+            # print(f"The AI optimal choice movement: {best_move}")
+            # board.push(best_move)
+            print(f"Count move: {total_count}")
+            total_count += 1
             if board.is_check():
                 print("YOU'RE IN CHECK")
+
             print(f"Legal moves for this turn: {getListOfMoves(board)}")
+            chessboardGUI = uiChessboard(FEN, getListOfMoves(board))
+            user_input = chessboardGUI.getMoveChosen()
 
             # user_input = input("Enter move: ")
             # while user_input not in getListOfMoves(board):
             #     user_input = input("Please chooose a new move: ")
-            random_move = random.randint(0, len(getListOfMoves(board))-1)
-            user_input = getListOfMoves(board)[random_move]
-            move = board.parse_san(user_input)
-            if board.is_capture(move):
-                # Convert user input (SAN) to a move object
-                # Now you can use the move object
-                captured_square = move.to_square
-                captured_piece = board.piece_at(captured_square)
+            '''
+            list_ = getListOfMoves(board)
+            user_input = ""
+            if len(list_) == 1:
+                user_input = list_[0]
+            else:
+                user_input = list_[random.randint(0,len(list_)-1)]
+            '''
                 
-                print(f"Human captured {captured_piece} at {captured_square}")
-                discard_cor = map_square_to_place(captured_square)
-                print(discard_cor)
-                # send the arduino the discard_cor and wait for a response
+            move = board.parse_san(user_input)
+            square = move.to_square
+            print(f"The piece location was: {square}")
+            #time.sleep(3)
+            
 
+            
+            #print(user_input.to_square)
+
+            
+            # UNCOMMENT
+            # if board.is_capture(move):
+            #     # a piece has been taken !! WE NEED TO CAPTURE!!
+            #     #time.sleep(3)
+            #     captured_square = move.to_square # read about this !!
+            #     # captured_piece = board.piece_at(captured_square)
+            #     discard_cor = map_square_to_place(captured_square)
+            #     print(f"The captured piece location was: {captured_square}")
+            #     ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            #     ser.reset_input_buffer()
+            #     stop_string = "Stop"
+            #     line = ""
+
+            #     while line != stop_string:
+            #         newS = ""
+            #         newS += str(discard_cor)
+            #         newS += "\n"
+            #         ser.write(str(newS).encode('utf-8'))
+            #         line = ser.readline().decode('utf-8').rstrip()
+                
+            
+            
+
+            '''
+                ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+                ser.reset_input_buffer()
+                stop_string = "Stop"
+                line = ""
+
+                while line != stop_string:
+                    line = ser.readline().decode('utf-8').rstrip()
+                    newS = ""
+                    newS += str(discard_cor)
+                    newS += "\n"
+                    ser.write(str(newS).encode('utf-8'))
+            '''
+            
+            # UNCOMMENT
+            # ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            # ser.reset_input_buffer()
+            # stop_string = "Stop"
+            # line = ""
+            # while line != stop_string:
+            #     newS = ""
+            #     newS += str(user_input)
+            #     newS += "\n"
+            #     ser.write(str(newS).encode('utf-8'))
+            #     line = ser.readline().decode('utf-8').rstrip()
             board.push_san(user_input)
-
+            
+            print(f"You chose: {user_input}")
+            #print(user_input[0])
+            
         counter += 1
 
     print(f"Total game moves: {counter}")
