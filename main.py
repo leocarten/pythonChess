@@ -6,6 +6,8 @@ import time
 from apriceChessboard import uiChessboard
 from tkinter import *
 from tkinter.ttk import *
+import pyttsx3 
+
 
 '''
 Author: Leo Carten.
@@ -14,6 +16,39 @@ Summary: Minimax functions are typically used in 1v1 player games, and are desic
 he minimax function uses recursion to recusively iterate through possible moves, and then evaluation the score of the game if that move were to be made. We then remove the move we want to explore, keeping tr
 ack of the maximum score of each iteration, and return the greatest score to maximize our chances of winning.
 '''
+
+belittling_strings = [
+    "Nice move, if you're trying to lose.",
+    "Did you learn chess from a book titled 'How to Lose'?",
+    "Are you trying to give me a handicap?",
+    "That move was so bad, even a beginner wouldn't make it.",
+    "Is that your strategy? Confuse yourself to victory?",
+    "You're playing chess like it's checkers.",
+    "Do you need a GPS to find your way back to a decent move?",
+    "Your moves are more predictable than a toddler's tantrum.",
+    "I've seen more creativity in a game of tic-tac-toe.",
+    "Is your plan to bore me to death with bad moves?",
+    "It's like you're playing blindfolded, but worse.",
+    "Do you want to swap brains? Yours seems to be malfunctioning.",
+    "If stupidity were a chess piece, you'd have a full set.",
+    "I've seen better moves from a broken rook.",
+    "Your moves are as weak as your opening.",
+    "Are you allergic to good moves?",
+    "That move deserves an award for the worst move of the century.",
+    "You must be playing chess in reverse.",
+    "If I had a dollar for every bad move you make, I'd be rich.",
+    "Your moves are like a gift to me. Thanks for the free points.",
+    "Are you taking advice from the chessboard? Because your moves make no sense.",
+    "I'm starting to think you're trying to lose on purpose.",
+    "If your moves were any worse, they'd be illegal.",
+    "Your moves are like a symphony of failure.",
+    "I didn't know the rules allowed for moves that bad.",
+    "I'm not sure if I should applaud your creativity or cry at your incompetence.",
+    "I hope you have a good excuse for that move, because I can't think of one.",
+    "Was that a move or a surrender?",
+    "I've seen better moves from a computer in sleep mode.",
+    "Is your strategy to make me laugh with bad moves?",
+]
 
 def createBoard():
     board = chess.Board()
@@ -125,6 +160,15 @@ def getScore(board):
 
     print(f"Human [black] score: {black_score}")
     print(f"AI [white] score: {white_score}")
+
+def PlayAudio():
+    global belittling_strings
+    voiceLine = random.choice(belittling_strings)
+    converter = pyttsx3.init() 
+    converter.setProperty('rate', 150) 
+    converter.setProperty('volume', 0.7) 
+    converter.say(voiceLine) 
+    converter.runAndWait() 
 
 def find_best_move(board, depth):
     best_move = "" 
@@ -319,6 +363,10 @@ def main():
             print(f"Legal moves for this turn: {getListOfMoves(board)}")
             chessboardGUI = uiChessboard(FEN, getListOfMoves(board))
             user_input = chessboardGUI.getMoveChosen()
+
+            # random_choice = random.randint(0,20)
+            # if random_choice % 2 == 0 and random_choice <= 14:
+            PlayAudio()
 
             # user_input = input("Enter move: ")
             # while user_input not in getListOfMoves(board):
