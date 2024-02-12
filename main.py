@@ -1,6 +1,6 @@
 import chess
 import random
-import serial
+# import serial
 import random
 import time
 from apriceChessboard import uiChessboard
@@ -22,9 +22,11 @@ def createBoard():
 '''
 A function that will return the optimized move for the AI.
 '''
-def minimax(board, depth, maximizing_player):
+def minimax(board, depth, maximizing_player, AiScore, HumanScore):
     # i think i need to have a different condition for when the depth is 0 and the game is over...
 
+    # print(f"AI score: {AiScore}")
+    # print(f"Human score: {HumanScore}")
 
     if depth == 0 or board.is_checkmate() or board.is_stalemate(): # if the game is over OR all possible options have been explored... just end the function call.
         # print(evaluateGame(getBoardFEN_string(board)))
@@ -32,13 +34,12 @@ def minimax(board, depth, maximizing_player):
         return evaluateGame(getBoardFEN_string(board)) # we have reached the limit of how far we can explore into the future, so, we return the current score if we were to make that move.
     
 
-
     if maximizing_player is True: # if it is our turn, we want to maximax the AI score by continously finding the best possible score. we return the max score
         max_eval = float('-inf') # start at a large negative number, and find the best move to optimize score
         for move in board.legal_moves:
             # print(f"Considering move: {move}")
             board.push(move)
-            eval = minimax(board, depth - 1, False) # flip the T/F, so when we call this function recursively, it also switches the turn
+            eval = minimax(board, depth - 1, False, AiScore, HumanScore) # flip the T/F, so when we call this function recursively, it also switches the turn
             board.pop()
             max_eval = max(max_eval, eval)
             # print(f"Evaluated move: {move} with score: {eval}")
@@ -47,7 +48,7 @@ def minimax(board, depth, maximizing_player):
         min_eval = float('inf') # start at large positive number, and find move to minimize opponents score
         for move in board.legal_moves:
             board.push(move)
-            eval = minimax(board, depth - 1, True) # flip the T/F, so when we call this function recursively, it also switches the turn
+            eval = minimax(board, depth - 1, True, AiScore, HumanScore) # flip the T/F, so when we call this function recursively, it also switches the turn
             board.pop()
             min_eval = min(min_eval, eval)
         return min_eval
@@ -76,6 +77,29 @@ def evaluateGame(board):
 
     return white_score - black_score
 
+def getScoreForMinimaxFunction(board):
+    # white is upper
+    # black is lower
+    # the AI [for testing purposes] will be black, the human [me] will be white ...
+    white_score = 0
+    black_score = 0
+    scoring_system = {
+        "p":1,
+        "n":3,
+        "b":3,
+        "r":5,
+        "q":9,
+        "k":15
+    }
+    for pieces in board:
+        if pieces != "/" and not str(pieces).isdigit():
+            value = scoring_system[pieces.lower()]
+            if pieces.islower():
+                black_score += value
+            elif pieces.isupper():
+                white_score += value
+
+    return [black_score, white_score]
 
 def getScore(board):
     # white is upper
@@ -106,30 +130,62 @@ def find_best_move(board, depth):
     best_move = "" 
     max_eval = float('-inf')
     arrayOfOptions = []
+    FEN = getBoardFEN_string(board)
+    score = getScoreForMinimaxFunction(FEN)
+    AiScore = score[1]
+    HumanScore = score[0]
 
-    for move in board.legal_moves: 
-        # print(f"move: {move}")
-        # explore each move by putting it on the board, then explore the score using the minimax function, and then pop the move so it is not permanent.
-        board.push(move) # make the move and explore it
-        eval = minimax(board, depth - 1, False) # call this function and continously update the the eval variable
-        board.pop() # remove the move you just did
+    if AiScore >= 40 and HumanScore <= 26:
+        print("The depth is 1!!\n\n")
+        for move in board.legal_moves: 
+            # print(f"move: {move}")
+            # explore each move by putting it on the board, then explore the score using the minimax function, and then pop the move so it is not permanent.
+            board.push(move) # make the move and explore it
+            eval = minimax(board, 1, False, AiScore, HumanScore) # call this function and continously update the the eval variable
+            board.pop() # remove the move you just did
 
-        # if eval == None:
-        #     break
+            # if eval == None:
+            #     break
 
-        if eval > max_eval:
-            max_eval = eval
-            best_move = move
-            arrayOfOptions = []
-        elif eval == max_eval:
-            arrayOfOptions.append(move)
-        
-    if len(arrayOfOptions) == 0:
+            if eval > max_eval:
+                max_eval = eval
+                best_move = move
+                arrayOfOptions = []
+            elif eval == max_eval:
+                arrayOfOptions.append(move)
+            
+        if len(arrayOfOptions) == 0:
+            return best_move
+        else:
+            choice = random.randint(0,len(arrayOfOptions)-1)
+            return arrayOfOptions[choice]
         return best_move
+    
     else:
-        choice = random.randint(0,len(arrayOfOptions)-1)
-        return arrayOfOptions[choice]
-    return best_move
+        print("The depth is 3!!")
+        for move in board.legal_moves: 
+            # print(f"move: {move}")
+            # explore each move by putting it on the board, then explore the score using the minimax function, and then pop the move so it is not permanent.
+            board.push(move) # make the move and explore it
+            eval = minimax(board, depth - 1, False, AiScore, HumanScore) # call this function and continously update the the eval variable
+            board.pop() # remove the move you just did
+
+            # if eval == None:
+            #     break
+
+            if eval > max_eval:
+                max_eval = eval
+                best_move = move
+                arrayOfOptions = []
+            elif eval == max_eval:
+                arrayOfOptions.append(move)
+            
+        if len(arrayOfOptions) == 0:
+            return best_move
+        else:
+            choice = random.randint(0,len(arrayOfOptions)-1)
+            return arrayOfOptions[choice]
+        return best_move
 
 
 def getBoardFEN_string(board):
@@ -199,47 +255,47 @@ def main():
             
 
             # UNCOMMENT
-            print(f"The AI optimal choice movement: {best_move}")
-            ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-            ser.reset_input_buffer()
-            print("Ser")
-            square = best_move.to_square
-            print(f"The piece location was: {square}")
+            # print(f"The AI optimal choice movement: {best_move}")
+            # ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            # ser.reset_input_buffer()
+            # print("Ser")
+            # square = best_move.to_square
+            # print(f"The piece location was: {square}")
 
 
             # UNCOMMENT
-            if board.is_capture(best_move):
-                #time.sleep(3)
-                # a piece has been taken !! WE NEED TO CAPTURE!!
-                captured_square = best_move.to_square
-                print(f"The captured piece location was: {captured_square}")
-                #captured_piece = board.piece_at(captured_square)
-                discard_cor = map_square_to_place(captured_square)
-                ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-                ser.reset_input_buffer()
-                stop_string = "Stop"
-                line = ""
+            # if board.is_capture(best_move):
+            #     #time.sleep(3)
+            #     # a piece has been taken !! WE NEED TO CAPTURE!!
+            #     captured_square = best_move.to_square
+            #     print(f"The captured piece location was: {captured_square}")
+            #     #captured_piece = board.piece_at(captured_square)
+            #     discard_cor = map_square_to_place(captured_square)
+            #     ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            #     ser.reset_input_buffer()
+            #     stop_string = "Stop"
+            #     line = ""
 
-                while line != stop_string:
-                    newS = ""
-                    newS += str(discard_cor)
-                    newS += "\n"
-                    ser.write(str(newS).encode('utf-8'))
-                    line = ser.readline().decode('utf-8').rstrip()
+            #     while line != stop_string:
+            #         newS = ""
+            #         newS += str(discard_cor)
+            #         newS += "\n"
+            #         ser.write(str(newS).encode('utf-8'))
+            #         line = ser.readline().decode('utf-8').rstrip()
             
-            ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-            ser.reset_input_buffer()
-            stop_string = "Stop"
-            line = ""
+            # ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            # ser.reset_input_buffer()
+            # stop_string = "Stop"
+            # line = ""
             
 
-            while line != stop_string:
-                newS = ""
-                newS += str(best_move)
-                newS += "\n"
-                ser.write(str(newS).encode('utf-8'))
-                line = ser.readline().decode('utf-8').rstrip()
-                print(line)
+            # while line != stop_string:
+            #     newS = ""
+            #     newS += str(best_move)
+            #     newS += "\n"
+            #     ser.write(str(newS).encode('utf-8'))
+            #     line = ser.readline().decode('utf-8').rstrip()
+            #     print(line)
 
  
                 
@@ -287,24 +343,24 @@ def main():
 
             
             # UNCOMMENT
-            if board.is_capture(move):
-                # a piece has been taken !! WE NEED TO CAPTURE!!
-                #time.sleep(3)
-                captured_square = move.to_square # read about this !!
-                # captured_piece = board.piece_at(captured_square)
-                discard_cor = map_square_to_place(captured_square)
-                print(f"The captured piece location was: {captured_square}")
-                ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-                ser.reset_input_buffer()
-                stop_string = "Stop"
-                line = ""
+            # if board.is_capture(move):
+            #     # a piece has been taken !! WE NEED TO CAPTURE!!
+            #     #time.sleep(3)
+            #     captured_square = move.to_square # read about this !!
+            #     # captured_piece = board.piece_at(captured_square)
+            #     discard_cor = map_square_to_place(captured_square)
+            #     print(f"The captured piece location was: {captured_square}")
+            #     ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            #     ser.reset_input_buffer()
+            #     stop_string = "Stop"
+            #     line = ""
 
-                while line != stop_string:
-                    newS = ""
-                    newS += str(discard_cor)
-                    newS += "\n"
-                    ser.write(str(newS).encode('utf-8'))
-                    line = ser.readline().decode('utf-8').rstrip()
+            #     while line != stop_string:
+            #         newS = ""
+            #         newS += str(discard_cor)
+            #         newS += "\n"
+            #         ser.write(str(newS).encode('utf-8'))
+            #         line = ser.readline().decode('utf-8').rstrip()
                 
             
             
@@ -324,16 +380,16 @@ def main():
             '''
             
             # UNCOMMENT
-            ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-            ser.reset_input_buffer()
-            stop_string = "Stop"
-            line = ""
-            while line != stop_string:
-                newS = ""
-                newS += str(user_input)
-                newS += "\n"
-                ser.write(str(newS).encode('utf-8'))
-                line = ser.readline().decode('utf-8').rstrip()
+            # ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+            # ser.reset_input_buffer()
+            # stop_string = "Stop"
+            # line = ""
+            # while line != stop_string:
+            #     newS = ""
+            #     newS += str(user_input)
+            #     newS += "\n"
+            #     ser.write(str(newS).encode('utf-8'))
+            #     line = ser.readline().decode('utf-8').rstrip()
             board.push_san(user_input)
             
             print(f"You chose: {user_input}")

@@ -20,7 +20,8 @@ class uiChessboard:
     def handle_click(self, button, row, col):
         global firstPick, secondPick, possibleMoves, result_var
         nums = "12345678"
-        letter = "abcdefgh"
+        # letter = "abcdefgh"
+        letter = "hgfedcba"
         if firstPick == "":
             result_var = StringVar()
             firstPick = f"{letter[col]}{nums[row]}"  # Adjust row index here
@@ -51,7 +52,7 @@ class uiChessboard:
         return flipped_fen
 
     def create_chessboard(self, fenString):
-        fenString = self.flip_fen(fenString)
+        # fenString = self.flip_fen(fenString)
         if self.root.winfo_exists():  # Check if the root window still exists
             self.root.title("Chessboard")
             for widget in self.root.winfo_children():
